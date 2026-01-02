@@ -75,7 +75,24 @@ def convert_text():
 def download_audio(filename):
     """Download generated audio file"""
     try:
+        # Validate filename to prevent directory traversal attacks
+        # Only allow alphanumeric, underscores, hyphens, and dots
+        import re
+        if not re.match(r'^[\w\-\.]+$', filename):
+            return jsonify({'error': 'Invalid filename'}), 400
+        
+        # Ensure the file is within the output directory
         file_path = voice_app.output_dir / filename
+        
+        # Check if the resolved path is actually within output_dir
+        try:
+            file_path = file_path.resolve()
+            output_dir_resolved = voice_app.output_dir.resolve()
+            if not str(file_path).startswith(str(output_dir_resolved)):
+                return jsonify({'error': 'Access denied'}), 403
+        except (OSError, RuntimeError):
+            return jsonify({'error': 'Invalid file path'}), 400
+        
         if file_path.exists():
             return send_file(file_path, as_attachment=True)
         else:
@@ -90,6 +107,10 @@ if __name__ == '__main__':
     print("\nStarting web server...")
     print("Open your browser and navigate to: http://localhost:5000")
     print("\nPress Ctrl+C to stop the server")
+    print("\n⚠️  NOTE: This is running in DEBUG mode for development.")
+    print("    For production use, set debug=False and use a production server.")
     print("="*60 + "\n")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use host='127.0.0.1' for better security (only accessible locally)
+    # Change to '0.0.0.0' only if you need network access
+    app.run(debug=True, host='127.0.0.1', port=5000)

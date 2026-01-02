@@ -27,7 +27,7 @@ class VoiceApp:
                 'name': voice.name,
                 'voice_id': voice.id,
                 'languages': voice.languages,
-                'gender': voice.gender if hasattr(voice, 'gender') else 'Unknown'
+                'gender': getattr(voice, 'gender', 'Unknown')
             }
             voice_list.append(voice_info)
         return voice_list

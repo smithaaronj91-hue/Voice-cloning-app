@@ -27,8 +27,14 @@ class VoiceCloner:
             try:
                 # Initialize with a multi-speaker model
                 print("Loading TTS model... This may take a moment on first run.")
-                # Use VCTK model which has multiple speakers including female voices
-                self.model = TTS(model_name="tts_models/en/vctk/vits", progress_bar=True)
+                # Try VCTK model first, fall back to a more common model if unavailable
+                try:
+                    self.model = TTS(model_name="tts_models/en/vctk/vits", progress_bar=True)
+                except Exception as e:
+                    print(f"VCTK model not available, trying alternative: {e}")
+                    # Fallback to a more commonly available model
+                    self.model = TTS(model_name="tts_models/en/ljspeech/tacotron2-DDC", progress_bar=True)
+                
                 self.speakers = self.model.speakers if hasattr(self.model, 'speakers') else []
                 print(f"✓ TTS model loaded successfully with {len(self.speakers)} speakers")
             except Exception as e:
@@ -50,6 +56,8 @@ class VoiceCloner:
         print("="*60)
         
         # Filter and highlight female speakers
+        # Note: These patterns are heuristic and model-specific
+        # For production use, consider using model metadata or configuration
         female_indicators = ['f_', 'female', 'woman', 'lady', 'p2', 'p3', 'p4']
         
         for idx, speaker in enumerate(self.speakers):
@@ -58,7 +66,8 @@ class VoiceCloner:
             marker = "★" if is_female else " "
             print(f"{marker} {idx}: {speaker}")
         
-        print("\n★ = Likely female voice")
+        print("\n★ = Likely female voice (based on naming patterns)")
+        print("   Note: Voice characteristics may vary by model")
         print("="*60 + "\n")
         return self.speakers
     
