@@ -101,16 +101,24 @@ def download_audio(filename):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    import os
+    
     print("\n" + "="*60)
     print("VOICE CLONING WEB APP")
     print("="*60)
     print("\nStarting web server...")
     print("Open your browser and navigate to: http://localhost:5000")
     print("\nPress Ctrl+C to stop the server")
-    print("\n⚠️  NOTE: This is running in DEBUG mode for development.")
-    print("    For production use, set debug=False and use a production server.")
+    
+    # Check for production mode environment variable
+    is_production = os.environ.get('FLASK_ENV') == 'production'
+    
+    if not is_production:
+        print("\n⚠️  NOTE: Running in DEBUG mode for development.")
+        print("    For production use, set FLASK_ENV=production")
     print("="*60 + "\n")
     
     # Use host='127.0.0.1' for better security (only accessible locally)
     # Change to '0.0.0.0' only if you need network access
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    # Debug mode is disabled in production
+    app.run(debug=(not is_production), host='127.0.0.1', port=5000)

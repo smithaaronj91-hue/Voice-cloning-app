@@ -177,8 +177,19 @@ Make sure port 5000 is not in use:
 # Check if port is in use
 netstat -an | grep 5000
 
-# Use a different port
-python web_app.py --port 8000
+# Kill any process using it
+```
+
+### Production Deployment
+For production use:
+```bash
+# Disable debug mode
+export FLASK_ENV=production
+python web_app.py
+
+# Or use a production WSGI server
+pip install gunicorn
+gunicorn -w 4 -b 127.0.0.1:5000 web_app:app
 ```
 
 ## Project Structure 📂
